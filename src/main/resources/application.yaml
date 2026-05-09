@@ -1,3 +1,12 @@
+server:
+  port: ${PORT-NUMBER}
+  ssl:
+    enabled: true
+    key-store: classpath:keystore.p12
+    key-store-password: ${KS-PASSWORD}
+    key-store-type: PKCS12
+    key-alias: authservice
+    
 spring:
   application:
     name: authService
@@ -18,9 +27,9 @@ spring:
     show-sql: true
 
 app:
-  jwt:
-    secret: ${JWT_SECRET}
-    expiration: ${JWT_EXPIRATION}
+    jwt:
+        secret: ${JWT_SECRET}
+        expiration: ${JWT_EXPIRATION}
 
 logging:
   level:
