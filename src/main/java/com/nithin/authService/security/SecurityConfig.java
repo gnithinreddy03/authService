@@ -35,7 +35,8 @@ public class SecurityConfig {
 
     private static final String[] PUBLIC_POST_ENDPOINTS = {
             "/auth/register",
-            "/auth/login"
+            "/auth/login",
+            "/auth/refresh"
     };
 
     private final DatabaseUserDetailsService databaseUserDetailsService;

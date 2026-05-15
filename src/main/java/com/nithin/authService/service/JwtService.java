@@ -19,6 +19,9 @@ public class JwtService {
     private final Key signingKey;
     private final long jwtExpiration;
 
+    private static final String ACCESS = "ACCESS";
+    private static final String REFRESH = "REFRESH";
+
     public JwtService(
             @Value("${app.jwt.secret}") String secret,
             @Value("${app.jwt.expiration}") long jwtExpiration
@@ -28,12 +31,23 @@ public class JwtService {
 
         this.jwtExpiration = jwtExpiration;
     }
-    public String generateToken(String username, List<String> roles){
+    public String generateAccessToken(String username, List<String> roles){
         return Jwts.builder()
                 .setSubject(username)
                 .claim("roles", roles)
+                .claim("type",ACCESS)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
+                .signWith(signingKey, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public String generateRefreshToken(String username) {
+        return Jwts.builder()
+                .setSubject(username)
+                .claim("type",REFRESH)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 60))
                 .signWith(signingKey, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -44,6 +58,14 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
+    }
+
+    public String extractTokenType(String token){
+        return Jwts.parser()
+                .setSigningKey(signingKey)
+                .parseClaimsJws(token)
+                .getBody()
+                .get("type",String.class);
     }
 
     public List<GrantedAuthority> extractRoles(String token){
@@ -59,7 +81,15 @@ public class JwtService {
     }
 
 
-    public boolean validate(String token){
-        return extractUsername(token)!=null;
+    public boolean validateAccessToken(String token){
+        String username =  extractUsername(token);
+        String tokenType = extractTokenType(token);
+        return username!=null && ACCESS.equals(tokenType);
+    }
+
+    public boolean validateRefreshToken(String token){
+        String username =  extractUsername(token);
+        String tokenType = extractTokenType(token);
+        return username!=null && REFRESH.equals(tokenType);
     }
 }

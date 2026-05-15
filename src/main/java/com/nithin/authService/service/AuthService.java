@@ -3,6 +3,7 @@ package com.nithin.authService.service;
 import com.nithin.authService.dao.AppUser;
 import com.nithin.authService.dto.AuthResponse;
 import com.nithin.authService.dto.LoginRequest;
+import com.nithin.authService.dto.RefreshRequest;
 import com.nithin.authService.dto.RegisterRequest;
 import com.nithin.authService.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -53,11 +54,24 @@ public class AuthService {
     }
 
     private AuthResponse issueTokens(AppUser user) {
-       String accessTokenn = jwtService.generateToken(user.getUsername(), user.getRoles());
+       String accessToken = jwtService.generateAccessToken(user.getUsername(), user.getRoles());
+       String refreshToken = jwtService.generateRefreshToken(user.getUsername());
        String bearer = "BEARER";
        return AuthResponse.builder()
-               .accessToken(accessTokenn)
+               .accessToken(accessToken)
+               .refreshToken(refreshToken)
                .tokenType(bearer)
                .build();
+    }
+
+    public AuthResponse refreshToken(RefreshRequest request) {
+        String refreshToken = request.getRefreshToken();
+        boolean validRefreshToken = jwtService.validateRefreshToken(refreshToken);
+        if(!validRefreshToken){
+            throw new RuntimeException("Invalid refresh token");//TODO:Write a custom exception
+        }
+        String username = jwtService.extractUsername(refreshToken);
+        AppUser user = userRepository.findByUsername(username).orElseThrow();
+        return issueTokens(user);
     }
 }

@@ -30,7 +30,7 @@ public class JWTFilter extends OncePerRequestFilter {
         String header = request.getHeader(AUTHORIZATION);
         if(header!=null && header.startsWith(BEARER)){
             String token = header.substring(7);
-            if(jwtService.validate(token) &&
+            if(jwtService.validateAccessToken(token) &&
                     SecurityContextHolder.getContext().getAuthentication()==null){
                 String username = jwtService.extractUsername(token);
                 List<GrantedAuthority> authorities = jwtService.extractRoles(token);

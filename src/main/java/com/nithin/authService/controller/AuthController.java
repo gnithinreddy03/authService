@@ -2,6 +2,7 @@ package com.nithin.authService.controller;
 
 import com.nithin.authService.dto.AuthResponse;
 import com.nithin.authService.dto.LoginRequest;
+import com.nithin.authService.dto.RefreshRequest;
 import com.nithin.authService.dto.RegisterRequest;
 import com.nithin.authService.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -23,5 +24,10 @@ public class AuthController {
     @PostMapping("/login")
     public AuthResponse login(@RequestBody LoginRequest request) {
         return authService.login(request);
+    }
+
+    @PostMapping("/refresh")
+    public AuthResponse refresh(@RequestBody RefreshRequest request){
+        return authService.refreshToken(request);
     }
 }
