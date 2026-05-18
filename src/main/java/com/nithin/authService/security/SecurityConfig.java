@@ -1,6 +1,8 @@
 package com.nithin.authService.security;
 
 
+import com.nithin.authService.exception.JwtAccessDeniedHandler;
+import com.nithin.authService.exception.JwtAuthenticationEntryPoint;
 import com.nithin.authService.filter.JWTFilter;
 import com.nithin.authService.service.DatabaseUserDetailsService;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +43,8 @@ public class SecurityConfig {
 
     private final DatabaseUserDetailsService databaseUserDetailsService;
     private final JWTFilter jwtFilter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         http
@@ -52,6 +56,10 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                        .accessDeniedHandler(jwtAccessDeniedHandler)
+                )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
